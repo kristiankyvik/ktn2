@@ -2,27 +2,18 @@ import SocketServer
 import threading
 import time
 import random
+import json
 
 
 
 class TCPHandler(SocketServer.BaseRequestHandler):
     
     @staticmethod
-    def sendToAll(data):
-        for i in range(len(ThreadServer.users)):
-            if ThreadServer.users[i]==self:
-                continue
-            ThreadServer.users[i].request.send(data)
+    def sendToAll(data, self):
+        for key in ThreadServer.users:
+            ThreadServer.users[key].request.send(data)
             
-    @staticmethod
-    def welcomeUser(self):
-        userID=random.randint(10000, 90000)
-        userName="user_"+str(userID)
-        ThreadServer.users.append((userName,self))
-        welcome_Message= userName + " joined the chat room"
-        for i in range(len(ThreadServer.users)):
-            ThreadServer.users[i][1].request.send(welcome_Message)
-        return userName
+
         
     @staticmethod    
     def getUserName(self):
@@ -33,50 +24,63 @@ class TCPHandler(SocketServer.BaseRequestHandler):
     @staticmethod
     def processData(self, data):
         time_Stamp="said @ <timestamp>: <the message>"
-        userName=TCPHandler.getUserName(self)
-        data_processed=userName+" said @ "+ str(time.strftime("%H:%M:%S"))+": "+data
+        username=TCPHandler.getUserName(self)
+        data_processed=username+" said @ "+ str(time.strftime("%H:%M:%S"))+": "+data
         ThreadServer.chatRoom.append(data_processed)
         return data_processed
 	
-	def Parse(data):
-		if data.startswith('/nick'):
-            oldpeer = UserName
-            UserName = data.replace('/nick', '', 1).strip()
-            if len(UserName):
-                data("%s now goes by %s\r\n" \
-                                % (str(oldpeer), str(UserName)))
-            else: UserName = oldpeer
-
-		elif data_processed.startswith('/logout'):
-                data= "logout"
-
-        return data
-
     
+    @staticmethod
+    def checkIfLoggedIn(self):
+        if Thread.users.contains(self):
+            return True
+        else:
+            return False
+            
+    @staticmethod
+    def welcomeUser(self, data):
+        username=data["username"]
+        ThreadServer.users[username]=self
+        welcome_Message= username + " joined the chat room"
+        TCPHandler.sendToAll(welcome_Message, self)
+        # for key in ThreadServer.users:
+        #     ThreadServer.users[key].request.send(welcome_Message)
+            
+             
+    @staticmethod
+    def parser (data, self):
+        if data["request"]=="login":
+            username=TCPHandler.welcomeUser(self, data)
+            print ThreadServer.users
+       
+        elif data=="/logout":
+            if TCPHandler.checkIfLoggedIn(self):
+                Thread.users.remove(self)
+                print ThreadServer.users
+            else:
+                 "user was no logged in"
+        else:
+            pass
+            
+        
     def handle(self):
-        userName=TCPHandler.welcomeUser(self)
+        data= json.loads(self.request.recv(1024).strip())
+        TCPHandler.parser(data, self)
+
         while 1:
             try:
-                data= self.request.recv(1024)
-				TCPHandler.Parse(data)
-				if data.equals(logout):
-					break
-					
+                data= json.loads(self.request.recv(1024))
                 data_processed= TCPHandler.processData(self, data)
-                
-                #TCPHandler.sendToAll(data) #why the fuckkkkkkk
-                #print data_processed
+
                 print  ThreadServer.chatRoom
-                for i in range(len(ThreadServer.users)):
-                    if ThreadServer.users[i][1]==self:
-                        continue
-                    ThreadServer.users[i][1].request.send(data_processed) 
+                TCPHandler.sendToAll(data, self)
+                
+
             except:
                 print "there was an error"
-		self.close()
 
 class ThreadServer (SocketServer.ThreadingMixIn, SocketServer.ForkingTCPServer):
-    users=[] #change to a freaking dicctionary
+    users={} #change to a freaking dicctionary
     chatRoom=[]    
     pass
 
