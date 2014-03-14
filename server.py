@@ -39,7 +39,7 @@ class TCPHandler(SocketServer.BaseRequestHandler):
         return data_processed
 	
 	def Parse(data):
-	if data.startswith('/nick'):
+		if data.startswith('/nick'):
             oldpeer = UserName
             UserName = data.replace('/nick', '', 1).strip()
             if len(UserName):
@@ -47,7 +47,7 @@ class TCPHandler(SocketServer.BaseRequestHandler):
                                 % (str(oldpeer), str(UserName)))
             else: UserName = oldpeer
 
-			elif data_processed.startswith('/logout'):
+		elif data_processed.startswith('/logout'):
                 data= "logout"
 
         return data
@@ -59,6 +59,9 @@ class TCPHandler(SocketServer.BaseRequestHandler):
             try:
                 data= self.request.recv(1024)
 				TCPHandler.Parse(data)
+				if data.equals(logout):
+					break
+					
                 data_processed= TCPHandler.processData(self, data)
                 
                 #TCPHandler.sendToAll(data) #why the fuckkkkkkk
@@ -70,6 +73,7 @@ class TCPHandler(SocketServer.BaseRequestHandler):
                     ThreadServer.users[i][1].request.send(data_processed) 
             except:
                 print "there was an error"
+		self.close()
 
 class ThreadServer (SocketServer.ThreadingMixIn, SocketServer.ForkingTCPServer):
     users=[] #change to a freaking dicctionary
