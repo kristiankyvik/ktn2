@@ -36,7 +36,21 @@ class TCPHandler(SocketServer.BaseRequestHandler):
         userName=TCPHandler.getUserName(self)
         data_processed=userName+" said @ "+ str(time.strftime("%H:%M:%S"))+": "+data
         ThreadServer.chatRoom.append(data_processed)
-        return data_processed   
+        return data_processed
+	
+	def Parse(data):
+	if data.startswith('/nick'):
+            oldpeer = UserName
+            UserName = data.replace('/nick', '', 1).strip()
+            if len(UserName):
+                data("%s now goes by %s\r\n" \
+                                % (str(oldpeer), str(UserName)))
+            else: UserName = oldpeer
+
+			elif data_processed.startswith('/logout'):
+                data= "logout"
+
+        return data
 
     
     def handle(self):
@@ -44,6 +58,7 @@ class TCPHandler(SocketServer.BaseRequestHandler):
         while 1:
             try:
                 data= self.request.recv(1024)
+				TCPHandler.Parse(data)
                 data_processed= TCPHandler.processData(self, data)
                 
                 #TCPHandler.sendToAll(data) #why the fuckkkkkkk
