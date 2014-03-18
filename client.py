@@ -28,14 +28,13 @@ def parserIn(data):
         else:
             print "trying to chnage status"
             status=1 
+			lenght= len(response)
+		for i in range(0,lenght):
+			print(response)
              
     elif response=="message":
         print data["message"]
-	
-	elif response=='messages':
-		lenght= len(response)
-		for i in range(0,lenght):
-			print(response)
+		
         
     elif response=="logout":
         if data.has_Key(error):
