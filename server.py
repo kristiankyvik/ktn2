@@ -3,15 +3,20 @@ import threading
 import time
 import random
 import json
+import re
+valid = re.match('^[\w-]+$', ) is not None
 
 
 
 class TCPHandler(SocketServer.BaseRequestHandler):
     
     @staticmethod
-    def sendToAll(data, self):
+    def sendToAll(data, username):
+        JSON_Obj={}
+        JSON_Obj['response']='message'
+        JSON_Obj['message']=data
         for key in ThreadServer.users:
-            ThreadServer.users[key].request.send(data)
+            ThreadServer.users[key].request.send(json.dumps(JSON_Obj))
                     
     @staticmethod    
     def getUserName(self):
@@ -40,7 +45,7 @@ class TCPHandler(SocketServer.BaseRequestHandler):
         username=data["username"]
         ThreadServer.users[username]=self
         welcome_Message= username + " joined the chat room"
-        #TCPHandler.sendToAll(welcome_Message, self)
+        TCPHandler.sendToAll(welcome_Message, username)
         JSON_Reply= {
             'response': 'login'
         }
@@ -52,11 +57,21 @@ class TCPHandler(SocketServer.BaseRequestHandler):
              
     @staticmethod
     def parser (data, self):
-        if (data["request"]=="login") and not TCPHandler.checkIfLoggedIn(data):
-            username=TCPHandler.welcomeUser(self, data)
-            print ThreadServer.users
-       
-        elif data["request"]=="logout" and TCPHandler.checkIfLoggedIn(data):
+        #JSON_Obj={"response":"logout"}
+        #JSON_Obj["username"]=username
+         
+         
+         
+        if (data["request"]=="login"):
+            
+            if not TCPHandler.checkIfLoggedIn(data):
+                TCPHandler.welcomeUser(self, data)
+                
+            elif TCPHandler.checkIfLoggedIn(data):
+                
+            
+                
+       elif data["request"]=="logout" and TCPHandler.checkIfLoggedIn(data):
            del ThreadServer.users[data["username"]]
                 
         else:
@@ -71,6 +86,7 @@ class TCPHandler(SocketServer.BaseRequestHandler):
         while 1:
             try:
                 data= json.loads(self.request.recv(1024))
+                TCPHandler.parser(data, self)
                 data_processed= TCPHandler.processData(self, data)
                 print  ThreadServer.chatRoom
                 TCPHandler.sendToAll(data, self)

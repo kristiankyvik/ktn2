@@ -43,7 +43,7 @@ def parserIn(data):
         
 def parserOut(msg, sock):
     global status
-    if msg='login':
+    if msg=='login':
         if status==0:
             initUser(sock)
         else:
@@ -51,15 +51,17 @@ def parserOut(msg, sock):
             JSON_Obj["username"]=username
             sock.send(json.dumps(JSON_Obj))
     elif msg=="logout":
-        JSON_Obj={"request":"login"}
+        JSON_Obj={"request":"logout"}
         JSON_Obj["username"]=username
         sock.send(json.dumps(JSON_Obj))
         
                         
 def main():
     #json format message
-    global status= 0
-    global username=None
+    global status
+    status =0
+    global username
+    username=None
     host, port = "localhost" , 9999
     sock= socket.socket()
     sock.connect((host,port))
@@ -72,7 +74,7 @@ def main():
             if s == sock: 
                 # handle the server socket 
                 data = json.loads(sock.recv(1024).strip())
-                print data 
+                print data["messages"] 
                                  
             elif s == sys.stdin: #s == sys.stdin 
                 msg = sys.stdin.readline().rstrip() 
