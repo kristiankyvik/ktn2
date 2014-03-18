@@ -12,9 +12,7 @@ class TCPHandler(SocketServer.BaseRequestHandler):
     def sendToAll(data, self):
         for key in ThreadServer.users:
             ThreadServer.users[key].request.send(data)
-            
-
-        
+                    
     @staticmethod    
     def getUserName(self):
         for i in range(len(ThreadServer.users)):
@@ -31,8 +29,8 @@ class TCPHandler(SocketServer.BaseRequestHandler):
 	
     
     @staticmethod
-    def checkIfLoggedIn(self):
-        if Thread.users.contains(self):
+    def checkIfLoggedIn(data):
+        if ThreadServer.users.has_key(data["username"]):
             return True
         else:
             return False
@@ -42,25 +40,28 @@ class TCPHandler(SocketServer.BaseRequestHandler):
         username=data["username"]
         ThreadServer.users[username]=self
         welcome_Message= username + " joined the chat room"
-        TCPHandler.sendToAll(welcome_Message, self)
-        # for key in ThreadServer.users:
-        #     ThreadServer.users[key].request.send(welcome_Message)
-            
+        #TCPHandler.sendToAll(welcome_Message, self)
+        JSON_Reply= {
+            'response': 'login'
+        }
+        JSON_Reply['username']=username
+        JSON_Reply['messages']=ThreadServer.chatRoom
+        
+        self.request.send(json.dumps(JSON_Reply))
+
              
     @staticmethod
     def parser (data, self):
-        if data["request"]=="login":
+        if (data["request"]=="login") and not TCPHandler.checkIfLoggedIn(data):
             username=TCPHandler.welcomeUser(self, data)
             print ThreadServer.users
        
-        elif data=="/logout":
-            if TCPHandler.checkIfLoggedIn(self):
-                Thread.users.remove(self)
-                print ThreadServer.users
-            else:
-                 "user was no logged in"
+        elif data["request"]=="logout" and TCPHandler.checkIfLoggedIn(data):
+           del ThreadServer.users[data["username"]]
+                
         else:
-            pass
+            print "prser just managed o print out this"
+            
             
         
     def handle(self):
@@ -71,7 +72,6 @@ class TCPHandler(SocketServer.BaseRequestHandler):
             try:
                 data= json.loads(self.request.recv(1024))
                 data_processed= TCPHandler.processData(self, data)
-
                 print  ThreadServer.chatRoom
                 TCPHandler.sendToAll(data, self)
                 
