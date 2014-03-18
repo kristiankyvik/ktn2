@@ -31,6 +31,11 @@ def parserIn(data):
              
     elif response=="message":
         print data["message"]
+	
+	elif response=='messages':
+		lenght= len(response)
+		for i in range(0,lenght):
+			print(response)
         
     elif response=="logout":
         if data.has_Key(error):
