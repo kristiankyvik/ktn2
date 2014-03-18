@@ -17,7 +17,7 @@ def parserServer(data):
             length= len(messages)
             for i in range(0,length):
                     print(messages[i])
-                    
+                
     elif response=="logout":
         if data.has_Key(error):
             print data["error"]
