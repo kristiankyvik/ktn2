@@ -2,86 +2,85 @@ import socket
 import sys
 import select
 import json
-
-
-
-
-def initUser(sock):
-    global username
-    print "Welcome!"
-    request=raw_input("Please write login to enter the chat: ") 
-    username=raw_input("Please write a username: ") 
-
-    JSON_Obj={
-        "request":"login"
-    }
-    JSON_Obj["username"]=username
-    
-    sock.send(json.dumps(JSON_Obj))  
+ 
         
-def parserIn(data):
+def parserServer(data):
     global status
     response=data["response"]
     if response=="login":
-        if data.has_Key("error"):
+        if "error" in data:
             print data["error"]
         else:
-            print "trying to chnage status"
             status=1 
-             
-    elif response=="message":
-        print data["message"]
-        
+            print str(status)
+            messages=data["messages"]
+            length= len(messages)
+            for i in range(0,length):
+                    print(messages[i])
+                    
     elif response=="logout":
         if data.has_Key(error):
             print data["error"]
         else:
             print "you have logged out, status changing"
-            status=0  
+            status=0
+                    
+    elif response=="message":
+        if "error" in data:
+            print data["error"]
+        else:
+            print data["message"]
+        
     else:
         print "parser did not understand"
         
-def parserOut(msg, sock):
-    global status
+def parserClient(msg, sock):
+    global status, username
+    JSON_Obj={}
     if msg=='login':
+        JSON_Obj["request"]="login"
+        
         if status==0:
-            initUser(sock)
+            username=raw_input("Please write a username: ").strip() 
+            JSON_Obj['username']=username
+            sock.send(json.dumps(JSON_Obj))
         else:
-            JSON_Obj={"request":"login"}
             JSON_Obj["username"]=username
             sock.send(json.dumps(JSON_Obj))
+                
     elif msg=="logout":
-        JSON_Obj={"request":"logout"}
+        print "logout message being sent to server"
+        JSON_Obj["request"]="logout"
         JSON_Obj["username"]=username
+        status=0
         sock.send(json.dumps(JSON_Obj))
-        
+    
+    else:
+        JSON_Obj["username"]=username
+        JSON_Obj["request"]="message"
+        JSON_Obj["message"]=msg
+        sock.send(json.dumps(JSON_Obj))       
                         
 def main():
-    #json format message
-    global status
+    global status, username
     status =0
-    global username
     username=None
     host, port = "localhost" , 9999
     sock= socket.socket()
     sock.connect((host,port))
     input = [sys.stdin, sock] 
     print "Welcome, write login to join" 
-    initUser(sock)
     while 1: 
-        inputready,outputready,exceptready = select.select(input,[],[])  
+        inputready,outputready,exceptready = select.select(input,[],[])
         for s in inputready: 
             if s == sock: 
                 # handle the server socket 
-                data = json.loads(sock.recv(1024).strip())
-                print data["messages"] 
+                data = json.loads(sock.recv(1024))
+                parserServer(data)
                                  
             elif s == sys.stdin: #s == sys.stdin 
-                msg = sys.stdin.readline().rstrip() 
-                try:
-                    sock.send() #what creates newline????
-                except:
-                    print "error"
+                msg = sys.stdin.readline().strip() 
+                parserClient(msg, sock)
 
             else: 
                 # handle all other sockets 
