@@ -3,6 +3,7 @@ import threading
 import time
 import random
 import json
+import re
 
 
 
@@ -27,6 +28,9 @@ class TCPHandler(SocketServer.BaseRequestHandler):
         ThreadServer.chatRoom.append(data_processed)
         return data_processed
 	
+	
+	def CheckValidity(str):
+		return re.match('^[\w-]+$', str) is not None
     
     @staticmethod
     def checkIfLoggedIn(data):
