@@ -12,7 +12,6 @@ def parserServer(data):
             print data["error"]
         else:
             status=1 
-            print str(status)
             messages=data["messages"]
             length= len(messages)
             for i in range(0,length):
