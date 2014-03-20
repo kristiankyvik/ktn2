@@ -15,12 +15,6 @@ class TCPHandler(SocketServer.BaseRequestHandler):
         for key in ThreadServer.users:
             if key != username:
                 ThreadServer.users[key].request.send(json.dumps(JSON_Reply))
-                    
-    # @staticmethod    
-  #   def getUserName(self):
-  #       for i in range(len(ThreadServer.users)):
-  #           if ThreadServer.users[i][1]==self:
-  #               return ThreadServer.users[i][0]
                 
     @staticmethod
     def processData(self, JSON_data):
@@ -29,8 +23,11 @@ class TCPHandler(SocketServer.BaseRequestHandler):
         ThreadServer.chatRoom.append(data_processed)
         return data_processed
         
-    #@staticmethod
-	
+    @staticmethod
+    def checkIfEmpty():
+        if not ThreadServer.users:
+            ThreadServer.chatRoom=[]
+            
     @staticmethod
     def checkValidity(str):
 		return re.match('^[\w-]+$', str) is not None
@@ -76,15 +73,16 @@ class TCPHandler(SocketServer.BaseRequestHandler):
             username=JSON_data["username"]
             del ThreadServer.users[JSON_data["username"]]
             goodbye_Message= username + " has left the conversation"
-            
             TCPHandler.sendToAll(goodbye_Message, JSON_data['username'])
             JSON_Reply["username"]= username            
             JSON_Reply["response"]="logout"
-            self.request.send(json.dumps(JSON_Reply))  
+            self.request.send(json.dumps(JSON_Reply))
+            TCPHandler.checkIfEmpty()
+            self.request.close()
+              
             
        
         elif JSON_data["request"]=='message':
-            
             try:
                 if 'username' in JSON_data:
                     username=JSON_data["username"]
@@ -107,7 +105,7 @@ class TCPHandler(SocketServer.BaseRequestHandler):
 
 class ThreadServer (SocketServer.ThreadingMixIn, SocketServer.ForkingTCPServer):
     users={} #change to a freaking dicctionary
-    chatRoom=[]    
+    chatRoom=[]
     pass
 
 def main():
