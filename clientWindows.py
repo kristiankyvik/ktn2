@@ -57,6 +57,7 @@ def parserClient(msg, sock):
         status=0
         sock.send(json.dumps(JSON_Obj))
         sock.close()
+        break
         
     
     else:
@@ -73,7 +74,7 @@ class Client(threading.Thread):
     def __init__(self):
         
         global status, username, sock
-        status =0
+        status=1
         username=None
         host, port = "78.91.20.191" , 4467
         sock= socket.socket()
@@ -87,8 +88,8 @@ class Client(threading.Thread):
         t2.start()
 
     def read(self):
-        global sock
-        while True:
+        global sock, status
+        while status:
             data = json.loads(sock.recv(1024))
             parserServer(data)
 
