@@ -57,7 +57,7 @@ def parserClient(msg, sock):
         status=0
         sock.send(json.dumps(JSON_Obj))
         sock.close()
-        break
+        
         
     
     else:
