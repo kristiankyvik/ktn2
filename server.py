@@ -28,6 +28,8 @@ class TCPHandler(SocketServer.BaseRequestHandler):
         data_processed=JSON_data["username"]+" said @ "+ str(time.strftime("%H:%M:%S"))+": "+ JSON_data["message"]
         ThreadServer.chatRoom.append(data_processed)
         return data_processed
+        
+    #@staticmethod
 	
     @staticmethod
     def checkValidity(str):
@@ -42,6 +44,7 @@ class TCPHandler(SocketServer.BaseRequestHandler):
              
     @staticmethod
     def parser (JSON_data, self):
+        print JSON_data
         JSON_Reply={}
         
         if (JSON_data["request"]=="login"):
@@ -63,7 +66,8 @@ class TCPHandler(SocketServer.BaseRequestHandler):
                 welcome_Message= username + " joined the chat room"
                 TCPHandler.sendToAll(welcome_Message, username)
                 JSON_Reply['messages']=ThreadServer.chatRoom
-                self.request.send(json.dumps(JSON_Reply))  
+                self.request.send(json.dumps(JSON_Reply))
+            
                 
             else:
                 print "parser not understand logg in message from client"              
@@ -74,6 +78,10 @@ class TCPHandler(SocketServer.BaseRequestHandler):
             goodbye_Message= username + " has left the conversation"
             
             TCPHandler.sendToAll(goodbye_Message, JSON_data['username'])
+            JSON_Reply["username"]= username            
+            JSON_Reply["response"]="logout"
+            self.request.send(json.dumps(JSON_Reply))  
+            
        
         elif JSON_data["request"]=='message':
             
@@ -83,6 +91,7 @@ class TCPHandler(SocketServer.BaseRequestHandler):
                     if not TCPHandler.checkIfLogged(username):
                         JSON_Reply["error"]="You are not logged in!"
                         JSON_Reply["response"]="message"
+                        self.request.send(json.dumps(JSON_Reply))  
                     else:
                         processed_Data=TCPHandler.processData(self, JSON_data)
                         TCPHandler.sendToAll(processed_Data, username)

@@ -16,17 +16,18 @@ def parserServer(data):
             length= len(messages)
             for i in range(0,length):
                     print(messages[i])
+            print "You have succesfully logged in, you can now chat with otgher members!"
                 
     elif response=="logout":
-        if data.has_Key(error):
+        if "error" in data:
             print data["error"]
         else:
-            print "you have logged out, status changing"
+            print "You have succesfully logged out!"
             status=0
                     
     elif response=="message":
         if "error" in data:
-            print data["error"]
+            print data["error"]+ " Write login to retry!"
         else:
             print data["message"]
         
@@ -68,6 +69,7 @@ def main():
     sock= socket.socket()
     sock.connect((host,port))
     input = [sys.stdin, sock] 
+    #syinput = [server, sock] 
     print "Welcome, write login to join" 
     while 1: 
         inputready,outputready,exceptready = select.select(input,[],[])
