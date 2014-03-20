@@ -38,28 +38,6 @@ def parserServer(data):
         
 def parserClient(msg, sock):
     global status, username
-    sponge=[
-"      .--..--..--..--..--..--.",
-"    .' \  (`._   (_)     _   \ ",
-"  .'    |  '._)         (_)  |",
-"  \ _.')\      .----..---.   /",
-"  |(_.'  |    /    .-\-.  \  |",
-"  \     0|    |   ( O| O) | o|",
-"   |  _  |  .--.____.'._.-.  |",
-"   \ (_) | o         -` .-`  |",
-"    |    \   |`-._ _ _ _ _\ /",
-"    \    |   |  `. |_||_|   |",
-"    | o  |    \_      \     |     -.   .-.",
-"    |.-.  \     `--..-'   O |     `.`-' .'",
-"  _.'  .' |     `-.-'      /-.__   ' .-'",
-".' `-.` '.|='=.='=.='=.='=|._/_ `-'.'",
-"`-._  `.  |________/\_____|    `-.'",
-"   .'   ).| '=' '='\/ '=' |",
-"   `._.`  '---------------'",
-"           //___\   //___\ ",
-"             ||       ||",
-"    LGB      ||_.-.   ||_.-.",
-"            (_.--__) (_.--__)"]
     JSON_Obj={}
     if msg=='login':
         JSON_Obj["request"]="login"
@@ -71,8 +49,6 @@ def parserClient(msg, sock):
         else:
             JSON_Obj["username"]=username
             sock.send(json.dumps(JSON_Obj))
- 
- 
         
     elif msg=="logout":
         print "logout message being sent to server"
@@ -82,9 +58,6 @@ def parserClient(msg, sock):
         sock.send(json.dumps(JSON_Obj))
         sock.close()
         
-    elif msg=="sponge":
-        for a in range (len(sponge)):
-            print sponge[a]
     
     else:
         JSON_Obj["username"]=username

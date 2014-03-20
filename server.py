@@ -91,6 +91,9 @@ class TCPHandler(SocketServer.BaseRequestHandler):
                         JSON_Reply["response"]="message"
                         self.request.send(json.dumps(JSON_Reply))  
                     else:
+                        if JSON_data["message"]=="sponge":
+                            sponge="      .--..--..--..--..--..--.\n    .' \  (`._   (_)     _   \\n  .'    |  '._)         (_)  |\n  \ _.')\      .----..---.   /\n  |(_.'  |    /    .-\-.  \  |\n  \     0|    |   ( O| O) | o|\n   |  _  |  .--.____.'._.-.  |\n   \ (_) | o         -` .-`  |\n    |    \   |`-._ _ _ _ _\ /\n    \    |   |  `. |_||_|   |\n    | o  |    \_      \     |     -.   .-.\n    |.-.  \     `--..-'   O |     `.`-' .'\n  _.'  .' |     `-.-'      /-.__   ' .-'\n.' `-.` '.|='=.='=.='=.='=|._/_ `-'.'\n`-._  `.  |________/\_____|    `-.'\n  .'   ).| '=' '='\/ '=' |\n   `._.`  '---------------'\n           //___\   //___\\n             ||       ||\n    LGB      ||_.-.   ||_.-.\n            (_.--__) (_.--__)"
+                            print sponge
                         processed_Data=TCPHandler.processData(self, JSON_data)
                         TCPHandler.sendToAll(processed_Data, username)
             except:
