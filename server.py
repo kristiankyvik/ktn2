@@ -102,8 +102,8 @@ class ThreadServer (SocketServer.ThreadingMixIn, SocketServer.ForkingTCPServer):
     pass
 
 def main():
-    host ="localhost"
-    port= 9999
+    host ="78.91.20.191"
+    port= 4467
     server = ThreadServer((host,port),TCPHandler)
     server_thread = threading.Thread(target=server.serve_forever)
     server_thread.start()

@@ -64,7 +64,7 @@ def main():
     global status, username
     status =0
     username=None
-    host, port = "localhost" , 9999
+    host, port = "78.91.20.191" , 4467
     sock= socket.socket()
     sock.connect((host,port))
     input = [sys.stdin, sock] 
