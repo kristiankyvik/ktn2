@@ -104,8 +104,11 @@ class TCPHandler(SocketServer.BaseRequestHandler):
             
     def handle(self):
         while 1:
-            JSON_data= json.loads(self.request.recv(1024))
-            TCPHandler.parser(JSON_data, self)
+            try:
+                JSON_data= json.loads(self.request.recv(1024))
+                TCPHandler.parser(JSON_data, self)
+            except Exception, e:
+                break
 
 class ThreadServer (SocketServer.ThreadingMixIn, SocketServer.ForkingTCPServer):
     users={} #change to a freaking dicctionary

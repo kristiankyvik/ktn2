@@ -3,7 +3,7 @@ import sys
 import select
 import json
 import threading
-
+import os
  
         
 def parserServer(data):
@@ -14,7 +14,7 @@ def parserServer(data):
             print data["error"]
         else:
             status=1
-            print "=============You have succesfully logged in===========\n==========you can now chat with other members!=============" 
+            print "=============  You have succesfully logged in  ===========\n==========  You can now chat with other members!  =============" 
             messages=data["messages"]
             length= len(messages)
             for i in range(0,length):
@@ -56,8 +56,6 @@ def parserClient(msg, sock):
         JSON_Obj["username"]=username
         status=0
         sock.send(json.dumps(JSON_Obj))
-        sock.close()
-        
         
     
     else:
@@ -68,18 +66,16 @@ def parserClient(msg, sock):
          
 
 class Client(threading.Thread):
-    global sock
-    
+    global sock, state
 
     def __init__(self):
-        
-        global status, username, sock
-        status=1
+        global status, username, sock, t, t2
+        status =0
         username=None
         host, port = "78.91.20.191" , 4467
         sock= socket.socket()
         sock.connect((host,port))
-        print "Welcome, write login to join"
+        print "========= Welcome to KTN2 Chat Service, write login to join =========="
 
         t = threading.Thread(target = self.read)
         t.start()
@@ -88,16 +84,25 @@ class Client(threading.Thread):
         t2.start()
 
     def read(self):
-        global sock, status
-        while status:
-            data = json.loads(sock.recv(1024))
-            parserServer(data)
-
+        global sock, state
+        state=True
+        while state:
+            try:
+                data = json.loads(sock.recv(1024))
+                parserServer(data)
+            except Exception, e:
+                state=False
+        sock.close()
+                 
+                   
     def write(self):
-        global sock
-        while True:
+        global sock, state
+        while state:
             msg = sys.stdin.readline().strip() 
             parserClient(msg, sock)
+            if msg=="logout":
+                break
+        
 
 
 client = Client()
