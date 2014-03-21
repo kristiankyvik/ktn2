@@ -41,6 +41,8 @@ class TCPHandler(SocketServer.BaseRequestHandler):
              
     @staticmethod
     def parser (JSON_data, self):
+        global status
+        staus=0
         print JSON_data
         JSON_Reply={}
         
@@ -53,22 +55,32 @@ class TCPHandler(SocketServer.BaseRequestHandler):
             if not TCPHandler.checkValidity(username):
                 JSON_Reply["error"]="Invalid Username!"
                 self.request.send(json.dumps(JSON_Reply))
-                
+            
             elif TCPHandler.checkIfLogged(username):
                 JSON_Reply["error"]="Name already taken!"
                 self.request.send(json.dumps(JSON_Reply))
-            
+                print status
+                
             elif not TCPHandler.checkIfLogged(username):
+                global status
                 ThreadServer.users[username]=self
                 welcome_Message= username + " joined the chat room"
                 TCPHandler.sendToAll(welcome_Message, username)
                 JSON_Reply['messages']=ThreadServer.chatRoom
                 self.request.send(json.dumps(JSON_Reply))
-            
-                
+                status=1
+                print status
+          
+                 
             else:
-                print "parser not understand logg in message from client"              
-                      
+                print "parser not understand logg in message from client" 
+                             
+        elif JSON_data["request"]=="logout" and JSON_data["username"] is None:
+            JSON_Reply["error"]="You are not logged in!"
+            JSON_Reply["response"]="logout"
+            self.request.send(json.dumps(JSON_Reply))
+            
+                          
         elif JSON_data["request"]=="logout" and TCPHandler.checkIfLogged(JSON_data["username"]):
             username=JSON_data["username"]
             del ThreadServer.users[JSON_data["username"]]
@@ -81,7 +93,6 @@ class TCPHandler(SocketServer.BaseRequestHandler):
             self.request.close()
               
             
-       
         elif JSON_data["request"]=='message':
             try:
                 if 'username' in JSON_data:

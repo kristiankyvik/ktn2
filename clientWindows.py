@@ -11,7 +11,7 @@ def parserServer(data):
     response=data["response"]
     if response=="login":
         if "error" in data:
-            print data["error"]
+            print data["error"] + " Write login to retry!"
         else:
             status=1
             print "=============  You have succesfully logged in  ===========\n==========  You can now chat with other members!  =============" 
@@ -22,10 +22,10 @@ def parserServer(data):
             
     elif response=="logout":
         if "error" in data:
-            print data["error"]
+            print data["error"]+ " Write login to retry!"
         else:
             print "You have succesfully logged out!"
-            status=0
+            status=1
                     
     elif response=="message":
         if "error" in data:
@@ -51,10 +51,8 @@ def parserClient(msg, sock):
             sock.send(json.dumps(JSON_Obj))
         
     elif msg=="logout":
-        print "logout message being sent to server"
         JSON_Obj["request"]="logout"
         JSON_Obj["username"]=username
-        status=0
         sock.send(json.dumps(JSON_Obj))
         
     
@@ -66,7 +64,7 @@ def parserClient(msg, sock):
          
 
 class Client(threading.Thread):
-    global sock, state
+    global sock, state, status
 
     def __init__(self):
         global status, username, sock, t, t2
@@ -96,11 +94,11 @@ class Client(threading.Thread):
                  
                    
     def write(self):
-        global sock, state
+        global sock, state, status
         while state:
             msg = sys.stdin.readline().strip() 
             parserClient(msg, sock)
-            if msg=="logout":
+            if msg=="logout" and status==1:
                 break
         
 
