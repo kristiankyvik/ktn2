@@ -4,6 +4,7 @@ import time
 import random
 import json
 import re
+import urllib2
 
 class TCPHandler(SocketServer.BaseRequestHandler):
     
@@ -50,16 +51,17 @@ class TCPHandler(SocketServer.BaseRequestHandler):
             username=JSON_data["username"] 
             
             JSON_Reply["response"]="login"
-            JSON_Reply["username"]=username
             
             if not TCPHandler.checkValidity(username):
+                JSON_Reply["username"]=username
                 JSON_Reply["error"]="Invalid Username!"
                 self.request.send(json.dumps(JSON_Reply))
             
             elif TCPHandler.checkIfLogged(username):
                 JSON_Reply["error"]="Name already taken!"
+                JSON_Reply["username"]=""
+                
                 self.request.send(json.dumps(JSON_Reply))
-                print status
                 
             elif not TCPHandler.checkIfLogged(username):
                 global status
@@ -67,15 +69,16 @@ class TCPHandler(SocketServer.BaseRequestHandler):
                 welcome_Message= username + " joined the chat room"
                 TCPHandler.sendToAll(welcome_Message, username)
                 JSON_Reply['messages']=ThreadServer.chatRoom
+                JSON_Reply["username"]=username
+                
                 self.request.send(json.dumps(JSON_Reply))
                 status=1
-                print status
           
                  
             else:
                 print "parser not understand logg in message from client" 
                              
-        elif JSON_data["request"]=="logout" and JSON_data["username"] is None:
+        elif JSON_data["request"]=="logout" and (JSON_data["username"] is None or JSON_data["username"]==""):
             JSON_Reply["error"]="You are not logged in!"
             JSON_Reply["response"]="logout"
             self.request.send(json.dumps(JSON_Reply))
@@ -127,7 +130,8 @@ class ThreadServer (SocketServer.ThreadingMixIn, SocketServer.ForkingTCPServer):
     pass
 
 def main():
-    host ="78.91.20.191"
+    host= urllib2.urlopen("http://myip.dnsdynamic.org/").read()
+    #host ="78.91.20.191"
     port= 4467
     server = ThreadServer((host,port),TCPHandler)
     server_thread = threading.Thread(target=server.serve_forever)

@@ -4,14 +4,17 @@ import select
 import json
 import threading
 import os
+import urllib2
  
         
 def parserServer(data):
-    global status
+    global status, username
     response=data["response"]
     if response=="login":
         if "error" in data:
             print data["error"] + " Write login to retry!"
+            username=data["username"]
+            
         else:
             status=1
             print "=============  You have succesfully logged in  ===========\n==========  You can now chat with other members!  =============" 
@@ -70,7 +73,7 @@ class Client(threading.Thread):
         global status, username, sock, t, t2
         status =0
         username=None
-        host, port = "78.91.20.191" , 4467
+        host, port = urllib2.urlopen("http://myip.dnsdynamic.org/").read() , 4467
         sock= socket.socket()
         sock.connect((host,port))
         print "========= Welcome to KTN2 Chat Service, write login to join =========="
